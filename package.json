@@ -1,0 +1,64 @@
+{
+    "name": "mas-piano-validator",
+    "description": "This repository contains the core library to validate the piano files used in the Monika After Story DDLC Mod.",
+    "version": "1.0.0",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "license": "MIT",
+    "dependencies": {
+        "ajv": "^6.6.2"
+    },
+    "devDependencies": {
+        "jest": "^23.6.0",
+        "xo": "^0.23.0"
+    },
+    "engines": {
+        "node": ">=8"
+    },
+    "scripts": {
+        "test": "xo && jest"
+    },
+    "xo": {
+        "ignores": [
+            "*.d.ts"
+        ],
+        "envs": [
+            "jest"
+        ]
+    },
+    "jest": {
+        "collectCoverage": true
+    },
+    "author": {
+        "name": "Nicola Dal Maso",
+        "url": "https://github.com/niktekusho/"
+    },
+    "bugs": {
+        "url": "TODO"
+    },
+    "contributors": [
+        {
+            "name": "Nicola Dal Maso",
+            "url": "https://github.com/niktekusho/"
+        }
+    ],
+    "files": [
+        "schema",
+        "index.d.ts"
+    ],
+    "homepage": "TODO",
+    "keywords": [
+        "DDLC",
+        "ddlc",
+        "MAS",
+        "mas",
+        "Piano",
+        "piano",
+        "MAS Piano",
+        "mas piano"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "TODO"
+    }
+}

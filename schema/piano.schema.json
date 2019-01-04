@@ -1,0 +1,135 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "mas/piano.schema.json",
+    "title": "MAS Piano Schema",
+    "description": "Monika After Story piano song schema",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "The name of the piano song. This is also shown to the player in the Piano song menu.",
+            "type": "string"
+        },
+        "verse_list": {
+            "description": "List of indexes (0 based) where each verse of the song starts. They are like checkpoints in a rythm game. The index should be the location of note-phrase in pnm_list that represents a start of a verse.",
+            "type": "array",
+            "items": {
+                "type": "integer"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+        "pnm_list": {
+            "description": "List of note phrases.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "description": "Lyrics sang by Monika during this set of notes.",
+                        "type": "string"
+                    },
+                    "style": {
+                        "description": "Style to apply to the text. Best to use 'monika_credits_text'.",
+                        "type": "string"
+                    },
+                    "notes": {
+                        "description": "List of notes in this phrase of the song.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "F4",
+                                "F4SH",
+                                "G4",
+                                "G4SH",
+                                "A4",
+                                "A4SH",
+                                "B4",
+                                "C5",
+                                "C5SH",
+                                "D5",
+                                "D5SH",
+                                "E5",
+                                "F5",
+                                "F5SH",
+                                "G5",
+                                "G5SH",
+                                "A5",
+                                "A5SH",
+                                "B5",
+                                "C6"
+                            ]
+                        },
+                        "minItems": 1
+                    },
+                    "postnotes": {
+                        "description": "List of optional notes that can be played after the 'notes'. These notes ensure smooth transitions from one phrase to the next.",
+                        "type": "array"
+                    },
+                    "express": {
+                        "description": "Sprite code to display during this note phrase. Showed as the notes are being played.",
+                        "type": "string"
+                    },
+                    "postexpress": {
+                        "description": "Sprite code to display when the phrase is successfully played. Showed after the notes have been played and while the postnotes are being played.",
+                        "type": "string"
+                    },
+                    "ev_timeout": {
+                        "description": "Number of seconds to wait before timing out input, assuming a missed note and thus resetting this verse. This is used to setup a larger timing window for the user input leading into the phrase. If not provided, the default timeout of 4 seconds is used.",
+                        "type": "number",
+                        "default": 4.0
+                    },
+                    "vis_timeout": {
+                        "description": "Number of seconds to wait before resetting Monika's expression and hide the lyrics. Main use: extend Monika's expression or visible lyrics for an amount of time before visual reset. Does NOT extends into the next phrase if the player continues with the correct input. If not provided, the default timeout of 4 seconds is used.",
+                        "type": "number",
+                        "default": 4.0
+                    },
+                    "verse": {
+                        "description": "Verse index this phrase belongs to. Must match a number in 'verse_list'",
+                        "type": "number"
+                    },
+                    "posttext": {
+                        "description": "Show or hide the lyric right after the phrase is completed. Default is 'false'.",
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "_comment": {
+                        "description": "Like the '_comment' field in the whole song: useful comments for the phrase should go here.",
+                        "anyOf": [
+                            {"$ref": "#/definitions/comment"},
+                            {"$ref": "#/definitions/comments"}
+                        ]
+                    }
+                },
+                "required": [
+                    "text",
+                    "style",
+                    "notes"
+                ]
+            }
+        },
+        "_comment": {
+            "description": "Utility field used to add comments.",
+            "anyOf": [
+                {"$ref": "#/definitions/comment"},
+                {"$ref": "#/definitions/comments"}
+            ]
+        }
+    },
+    "required": [
+        "name",
+        "verse_list",
+        "pnm_list"
+    ],
+    "definitions": {
+        "comment": {
+            "type": "string"
+        },
+        "comments": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/comment"
+            }
+        }
+    }
+}
