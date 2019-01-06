@@ -1,3 +1,5 @@
+import * as ajv from "ajv";
+
 /**
  * Metadata object interface.
  */
