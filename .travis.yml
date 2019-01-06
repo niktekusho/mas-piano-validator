@@ -9,7 +9,3 @@ node_js:
 env:
   - YARN_GPG=no
 cache: yarn
-before_install:
-  - pip install --user codecov
-after_success:
-  - codecov --file coverage/lcov.info --disable search
