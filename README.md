@@ -4,7 +4,9 @@
 
 This repository contains the core library to validate the piano files used in the DDLC Mod ["Monika After Story"](https://github.com/Monika-After-Story/MonikaModDev).
 
-You can find the corresponding CLI application [here](https://github.com/niktekusho/mas-piano-validator-cli). 
+The [Credits file](./CREDITS.md) clearly states who is the author of every song example you can find in this repository.
+
+You can find the corresponding CLI application [here](https://github.com/niktekusho/mas-piano-validator-cli).
 
 ## Introduction
 
