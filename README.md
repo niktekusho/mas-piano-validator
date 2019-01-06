@@ -105,6 +105,16 @@ For another usage example you can take a look at:
 -  the [test.js](./test.js) file;
 -  the [CLI application](https://github.com/niktekusho/mas-piano-validator-cli).
 
+### Accessing the schema file
+
+If you want you can access the JSON Schema document used in this library for JSON validation.
+
+The simplest way of accessing it is using `require`:
+
+```js
+const pianoSchema = require('mas-piano-validator/schema/piano.schema.json')
+```
+
 ## Related
 
 -   [CLI application](https://github.com/niktekusho/mas-piano-validator-cli).
