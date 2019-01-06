@@ -100,7 +100,7 @@ async function main() {
 
 ```
 
-For another usage example you can take a look at:
+For other usage examples you can take a look at:
 
 -  the [test.js](./test.js) file;
 -  the [CLI application](https://github.com/niktekusho/mas-piano-validator-cli).
