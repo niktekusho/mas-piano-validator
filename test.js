@@ -17,14 +17,42 @@ describe('Core library testing', () => {
 		// Case: null
 		expect(validate(null).ok).toStrictEqual(false);
 
-		// Case: string object
-		expect(validate('test').ok).toStrictEqual(false);
-
 		// Case: number object
 		expect(validate(1.0).ok).toStrictEqual(false);
 
 		// Case: array object
 		expect(validate([{a: 1}]).ok).toStrictEqual(false);
+	});
+
+	describe('when passing \'string\' argument', () => {
+		it('should try to parse passed string like a JSON file', () => {
+			// This is known to NOT be a valid piano song
+			const testObject = {
+				a: 'something'
+			};
+			const testString = JSON.stringify(testObject);
+			const meta = {src: 'test'};
+
+			// Create a spy on JSON.parse to test the actual call
+			const jsonParseSpy = jest.spyOn(JSON, 'parse');
+
+			const result = validate(testString, meta);
+			expect(result.ok).toStrictEqual(false);
+			expect(result.meta).toStrictEqual(meta);
+
+			expect(jsonParseSpy).toHaveBeenCalledTimes(1);
+			expect(jsonParseSpy).toHaveBeenCalledWith(testString);
+		});
+
+		it('should try to load the file in case the string is not a valid JSON literal', () => {
+			const testString = '{something: "very similar", "to": \'a valid JSON\'';
+
+			const result = validate(testString);
+			expect(result.ok).toStrictEqual(false);
+			expect(result.errors).toHaveLength(1);
+			// Match the error message
+			expect(result.errors[0]).toMatch(/not.*valid json literal/gmi);
+		});
 	});
 
 	it('testing with known valid examples', async () => {
@@ -33,9 +61,7 @@ describe('Core library testing', () => {
 		const filesContents = await Promise.all(
 			files.map(file => readFile(join(examplesDir, file), {encoding: 'utf8'}))
 		);
-		const results = filesContents
-			.map(fileContent => JSON.parse(fileContent))
-			.map(jsonContent => validate(jsonContent));
+		const results = filesContents.map(fileContent => validate(fileContent));
 
 		const failedExamples = results.filter(result => result.ok === false);
 		return expect(failedExamples).toHaveLength(0);
