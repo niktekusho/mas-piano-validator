@@ -93,10 +93,13 @@ const someFilePath = '...';
 
 async function main() {
     const fileContent = await readFile(someFilePath, {encoding: 'utf8'});
+    // Optional object, useful when you want to keep track of validation results
+    const meta = {
+        src: someFilePath
+    };
     // Here you should handle the error in case the file is not a valid JSON file
     try {
-        const parsedObject = JSON.parse(fileContent);
-        console.log(validate(parsedObject).ok); // true or false depending on the file...
+        console.log(validate(fileContent, meta).ok); // true or false depending on the file...
     }
 }
 
