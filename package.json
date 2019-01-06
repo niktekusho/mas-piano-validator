@@ -36,7 +36,7 @@
         "url": "https://github.com/niktekusho/"
     },
     "bugs": {
-        "url": "TODO"
+        "url": "https://github.com/niktekusho/mas-piano-validator/issues"
     },
     "contributors": [
         {
@@ -48,7 +48,7 @@
         "schema",
         "index.d.ts"
     ],
-    "homepage": "TODO",
+    "homepage": "https://github.com/niktekusho/mas-piano-validator",
     "keywords": [
         "DDLC",
         "ddlc",
@@ -61,6 +61,6 @@
     ],
     "repository": {
         "type": "git",
-        "url": "TODO"
+        "url": "https://github.com/niktekusho/mas-piano-validator"
     }
 }
