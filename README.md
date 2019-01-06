@@ -4,53 +4,21 @@
 
 This repository contains the core library to validate the piano files used in the DDLC Mod ["Monika After Story"](https://github.com/Monika-After-Story/MonikaModDev).
 
+You can find the corresponding CLI application [here](https://github.com/niktekusho/mas-piano-validator-cli). 
+
 ## Introduction
 
 In MAS you can play the piano to Monika and, depending on **how** the songs are *described*, she reacts to the song played.
 
 The mod recognizes all piano songs by parsing JSON formatted files.
 
-This library and CLI application allow you to validate the *structure* of the songs you are working on.
+This library allows you to validate the *structure* of the songs you are working on.
 
 **This project does not aim to check for the actual correctness of the song you are authoring.** 
 
 ## Installation
 
-### Requirements
-To use this application and library, you have to have installed [Node.js](https://nodejs.org/) and a console you can run commands into.
-
-Node.js comes bundled with `npm`, a package manager used to manage software written in JavaScript, which serves as the installation medium for this software.
-
-The **minimum required version** of Node.js is: [8 - codename "Carbon"](https://github.com/nodejs/Release#release-schedule).
-
-You can check this requirement by running the following commands:
-
-```sh
-$ node -v
-v8.15.0
-$ npm -v
-6.5.0
-```
-
-The critical part here is immediately after the character 'v' returned by the first command: `8` means we are using the minimum required version of Node.js. Any number higher than that works fine.
-
-### Application
-
-In your console, run the following command:
-
-```sh
-$ npm install -g mas-piano-validator
-```
-
-After the installation, you can check the application by running the command:
-
-```sh
-$ mas-piano-validator
-```
-
-### Library
-
-First, you must have a Node.js project including a `package.json` file.
+**Note:** to use this library, you have to have installed [Node.js](https://nodejs.org/) and a console you can run commands into. The **minimum required version** of Node.js is: [8 - codename "Carbon"](https://github.com/nodejs/Release#release-schedule).
 
 In your console, run the following command:
 
@@ -58,26 +26,87 @@ In your console, run the following command:
 $ npm install mas-piano-validator
 ```
 
-## Usage
-
-### Application
-
-By running one of the following commands:
+You can also use `yarn` (like we do in this project):
 
 ```sh
-$ mas-piano-validator
-$ mas-piano-validator -h
-$ mas-piano-validator --help
+$ yarn add mas-piano-validator
 ```
 
-you can read this specific document explaining the usage of the application.
+## Usage
 
-### Library
+The library exports a single function you can use to validate your object.
 
-TODO
+It is **critical** that you pass in an *already* parsed JSON object. This may change in the future, but for the moment the library expects *you to parse the JSON*.
+
+### Simple example
+
+```js
+const validate = require('mas-piano-validator');
+
+const validMASPiano = {
+    "name": "Song name",
+    "verse_list": [0],
+    "pnm_list": [
+        {
+            "text": "One",
+            "style": "monika_credits_text",
+            "notes": [
+                "D5",
+                "C5SH",
+                "B4",
+                "F4SH"
+            ]
+        },
+        {
+            "text": "Two",
+            "style": "monika_credits_text",
+            "notes": [
+                "D5",
+                "A4",
+                "D5",
+                "A4"
+            ]
+        }
+    ]
+};
+
+const result = validate(validMASPiano);
+
+console.log(result.ok); // true
+console.log(result.errors); // []
+```
+
+### Parse existing file
+
+```js
+const fs = require('fs');
+const {promisify} = require('util');
+
+const validate = require('mas-piano-validator'); 
+
+// We are going to use the promisified version of the fs.readFile function 
+const readFile = promisify(fs.readFile);
+
+const someFilePath = '...';
+
+async function main() {
+    const fileContent = await readFile(someFilePath, {encoding: 'utf8'});
+    // Here you should handle the error in case the file is not a valid JSON file
+    try {
+        const parsedObject = JSON.parse(fileContent);
+        console.log(validate(parsedObject).ok); // true or false depending on the file...
+    }
+}
+
+```
+
+For another usage example you can take a look at:
+
+-  the [test.js](./test.js) file;
+-  the [CLI application](https://github.com/niktekusho/mas-piano-validator-cli).
 
 ## Related
 
-TODO
+-   [CLI application](https://github.com/niktekusho/mas-piano-validator-cli).
 
 
