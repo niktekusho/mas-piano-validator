@@ -1,6 +1,6 @@
 # MAS Piano Songs Validator
 
-[![Build Status](https://travis-ci.org/niktekusho/mas-piano-validator.svg?branch=master)](https://travis-ci.org/niktekusho/mas-piano-validator)
+[![Build Status](https://travis-ci.org/niktekusho/mas-piano-validator.svg?branch=master)](https://travis-ci.org/niktekusho/mas-piano-validator) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo) 
 
 This repository contains the core library to validate the piano files used in the DDLC Mod ["Monika After Story"](https://github.com/Monika-After-Story/MonikaModDev).
 
