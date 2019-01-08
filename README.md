@@ -1,6 +1,6 @@
 # MAS Piano Songs Validator
 
-[![Build Status](https://travis-ci.org/niktekusho/mas-piano-validator.svg?branch=master)](https://travis-ci.org/niktekusho/mas-piano-validator) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo) [![Maintainability](https://api.codeclimate.com/v1/badges/744538fb7227c1a86bea/maintainability)](https://codeclimate.com/github/niktekusho/mas-piano-validator/maintainability)
+![](https://img.shields.io/github/license/niktekusho/mas-piano-validator.svg) [![](https://img.shields.io/npm/v/mas-piano-validator.svg)](https://www.npmjs.com/package/mas-piano-validator) [![Build Status](https://travis-ci.org/niktekusho/mas-piano-validator.svg?branch=master)](https://travis-ci.org/niktekusho/mas-piano-validator) [![](https://img.shields.io/node/v/mas-piano-validator.svg)](https://www.npmjs.com/package/mas-piano-validator) [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo) [![Maintainability](https://api.codeclimate.com/v1/badges/744538fb7227c1a86bea/maintainability)](https://codeclimate.com/github/niktekusho/mas-piano-validator/maintainability) [![](https://img.shields.io/bundlephobia/minzip/mas-piano-validator.svg)](https://bundlephobia.com/result?p=mas-piano-validator)
 
 This repository contains the core library to validate the piano files used in the DDLC Mod ["Monika After Story"](https://github.com/Monika-After-Story/MonikaModDev).
 
