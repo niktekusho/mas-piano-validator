@@ -47,4 +47,5 @@ function validate(obj, meta = {src: undefined}) {
 }
 
 module.exports = validate;
+module.exports.default = validate;
 module.exports.all = validateAll;
