@@ -16,6 +16,19 @@ class ValidationResult {
 	}
 }
 
+function validateAll(obj) {
+	if (Array.isArray(obj)) {
+		return obj.map(validationItem => {
+			if (validationItem.content && validationItem.meta) {
+				return validate(validationItem.content, validationItem.meta);
+			}
+			return validate(validationItem);
+		});
+	}
+	// TODO: find a way to communicate the wrong API
+	throw new Error(`The 'all' function expects an argument of type array, instead it received a ${typeof obj}`);
+}
+
 function validate(obj, meta = {src: undefined}) {
 	if (typeof obj === 'string') {
 		try {
@@ -34,3 +47,4 @@ function validate(obj, meta = {src: undefined}) {
 }
 
 module.exports = validate;
+module.exports.all = validateAll;
