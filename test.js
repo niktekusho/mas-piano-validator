@@ -100,14 +100,14 @@ describe('Core library testing', () => {
 			expect(result.ok).toStrictEqual(false);
 			expect(result.errors).toHaveLength(1);
 			// Match the error message
-			expect(result.errors[0]).toMatch(/not.*valid json literal/gmi);
+			expect(result.errors[0]).toMatch(/not.*valid json literal/i);
 		});
 	});
 
 	describe('when using the \'all\' API', () => {
 		it('should signal the user if the passed argument is not an array', () => {
-			expect(() => validate.all({})).toThrowError(/.*received.*object$/gmi);
-			expect(() => validate.all('a')).toThrowError(/.*received.*string$/gmi);
+			expect(() => validate.all({})).toThrowError(/.*received.*object$/mi);
+			expect(() => validate.all('a')).toThrowError(/.*received.*string$/mi);
 		});
 
 		it('should validate all of the arguments (source unknwown)', () => {
@@ -157,19 +157,19 @@ describe('Core library testing', () => {
 		it('should be able to create a readable message from the ValidationResult (with valid input and with source info)', () => {
 			const example = new MinimalExample();
 			const prettyMsg = validate(example).prettify(true);
-			expect(prettyMsg).toMatch(/(.*)( - )(.*valid.*song)/gmi);
+			expect(prettyMsg).toMatch(/(.*)( - )(.*valid.*song)/i);
 		});
 
 		it('should be able to create a readable message from the ValidationResult (with valid input and without source info)', () => {
 			const example = new MinimalExample();
 			const prettyMsg = validate(example).prettify();
-			expect(prettyMsg).toMatch(/.*valid.*song/gmi);
+			expect(prettyMsg).toMatch(/.*valid.*song/i);
 		});
 
 		it('should be able to create a readable message from the ValidationResult (with invalid input)', () => {
 			const example = new MinimalExample({enableName: false});
 			const prettyMsg = validate(example).prettify();
-			expect(prettyMsg).toMatch(/.*not.*valid.*song/gmi);
+			expect(prettyMsg).toMatch(/.*not.*valid.*song/i);
 		});
 
 		it('should throw a \'TypeError\' when at least one of the input is not a ValidationResult instance', () => {
@@ -193,7 +193,7 @@ describe('Core library testing', () => {
 				}
 			];
 			const results = validate.all(exampleData);
-			expect(validate.prettify(results)).toMatch(/.*all.*valid.*songs/gmi);
+			expect(validate.prettify(results)).toMatch(/.*all.*valid.*songs/i);
 		});
 
 		it('should create a multiline message from various ValidationResults when at least one input is not valid', () => {
@@ -209,7 +209,8 @@ describe('Core library testing', () => {
 				}
 			];
 			const results = validate.all(exampleData);
-			expect(validate.prettify(results)).toMatch(/.*some.*not valid.*songs.*details/gmi);
+			// The s regex flag allows '.' to match newlines too
+			expect(validate.prettify(results)).toMatch(/.*some.*not valid.*songs.*details:.*/is);
 		});
 	});
 });
