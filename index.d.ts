@@ -41,7 +41,13 @@ export interface ValidationResult {
 	/**
 	 * Metadata object.
 	 */
-	meta: ObjectSource
+	meta: ObjectSource,
+	/**
+	 * Create a readable message from this object.
+	 *
+	 * @param {boolean} includeMeta Include the ObjectSource in the validation message.
+	 */
+	prettify: (includeMeta?: boolean) => string
 }
 
 /**
@@ -62,3 +68,10 @@ export default function validate(obj: string|object, meta?: ObjectSource): Valid
  * all(...);
  */
 export function all(obj: string[]|ValidationItem[]|object[]): ValidationResult[];
+
+/**
+ * Create a readable message from the specified object.
+ *
+ * @param result
+ */
+export function prettify(result: ValidationResult|ValidationResult[]): string;
