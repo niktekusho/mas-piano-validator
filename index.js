@@ -1,3 +1,5 @@
+const {EOL} = require('os');
+
 const Ajv = require('ajv');
 
 const jsonSchema = require('./schema/piano.schema.json');
@@ -14,6 +16,40 @@ class ValidationResult {
 		this.ok = status;
 		this.errors = errors;
 	}
+
+	prettify(includeMeta = false) {
+		let prettified = '';
+		if (includeMeta) {
+			prettified += `${this.meta.src} - `;
+		}
+		if (this.ok) {
+			prettified += 'This file is a valid Monika After Story piano song!';
+		} else {
+			prettified += 'This file is NOT a valid Monika After Story piano song.';
+		}
+		return prettified;
+	}
+}
+
+function prettify(result) {
+	if (Array.isArray(result)) {
+		// Find at least one object in the array that is not ValidationResult
+		const notValidationResult = result.find(r => !(r instanceof ValidationResult));
+		if (notValidationResult) {
+			throw new TypeError('The results passed in contained at least an object not of type ValidationResult');
+		}
+		// Check if all ValidationResults are valid
+		const allValid = result.find(r => r.ok === false) === undefined;
+		if (allValid) {
+			return 'All files are valid Monika After Story piano songs!';
+		}
+		const introMsg = `Some songs are NOT valid Monika After Story piano songs.${EOL}Details:${EOL}`;
+		return introMsg + result.reduce((prev, curr) => prev.concat(`${EOL}${curr.prettify(true)}`), '');
+	}
+	if (!(result instanceof ValidationResult)) {
+		throw new TypeError('Cannot prettify anything other than a ValidationResult object');
+	}
+	return result.prettify();
 }
 
 function validateAll(obj) {
@@ -49,3 +85,4 @@ function validate(obj, meta = {src: undefined}) {
 module.exports = validate;
 module.exports.default = validate;
 module.exports.all = validateAll;
+module.exports.prettify = prettify;

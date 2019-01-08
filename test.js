@@ -47,21 +47,64 @@ class MinimalExample {
 // Important: not testing ajv features here, so do not test error object or the such from ajv.
 
 describe('Core library testing', () => {
-	it('result.ok should equal false when passing wrong objects', () => {
-		// Case: undefined
-		expect(validate().ok).toStrictEqual(false);
+	describe('when using the single call API', () => {
+		it('result.ok should equal false when passing wrong objects', () => {
+			// Case: undefined
+			expect(validate().ok).toStrictEqual(false);
 
-		// Case: null
-		expect(validate(null).ok).toStrictEqual(false);
+			// Case: null
+			expect(validate(null).ok).toStrictEqual(false);
 
-		// Case: number object
-		expect(validate(1.0).ok).toStrictEqual(false);
+			// Case: number object
+			expect(validate(1.0).ok).toStrictEqual(false);
 
-		// Case: array object
-		expect(validate([{a: 1}]).ok).toStrictEqual(false);
+			// Case: array object
+			expect(validate([{a: 1}]).ok).toStrictEqual(false);
+		});
+
+		it('testing with known valid examples', async () => {
+			const examplesDir = join(__dirname, 'examples');
+			const files = await readdir(examplesDir);
+			const filesContents = await Promise.all(
+				files.map(file => readFile(join(examplesDir, file), {encoding: 'utf8'}))
+			);
+			const results = filesContents.map(fileContent => validate(fileContent));
+
+			const failedExamples = results.filter(result => result.ok === false);
+			return expect(failedExamples).toHaveLength(0);
+		});
+
+		it('when passing \'string\' argument should try to parse passed string like a JSON file', () => {
+			// This is known to NOT be a valid piano song
+			const testObject = {
+				a: 'something'
+			};
+			const testString = JSON.stringify(testObject);
+			const meta = {src: 'test'};
+
+			// Create a spy on JSON.parse to test the actual call
+			const jsonParseSpy = jest.spyOn(JSON, 'parse');
+
+			const result = validate(testString, meta);
+			expect(result.ok).toStrictEqual(false);
+			expect(result.meta).toStrictEqual(meta);
+
+			expect(jsonParseSpy).toHaveBeenCalledTimes(1);
+			expect(jsonParseSpy).toHaveBeenCalledWith(testString);
+		});
+
+		it('when passing \'string\' argument should try to load the file in case the string is not a valid JSON literal', () => {
+			const testString = '{something: "very similar", "to": \'a valid JSON\'';
+
+			const result = validate(testString);
+			expect(result.ok).toStrictEqual(false);
+			expect(result.errors).toHaveLength(1);
+			// Match the error message
+			expect(result.errors[0]).toMatch(/not.*valid json literal/gmi);
+		});
 	});
 
-	describe('when using the \'all\' property', () => {
+	describe('when using the \'all\' API', () => {
 		it('should signal the user if the passed argument is not an array', () => {
 			expect(() => validate.all({})).toThrowError(/.*received.*object$/gmi);
 			expect(() => validate.all('a')).toThrowError(/.*received.*string$/gmi);
@@ -95,46 +138,78 @@ describe('Core library testing', () => {
 		});
 	});
 
-	describe('when passing \'string\' argument', () => {
-		it('should try to parse passed string like a JSON file', () => {
-			// This is known to NOT be a valid piano song
-			const testObject = {
-				a: 'something'
-			};
-			const testString = JSON.stringify(testObject);
-			const meta = {src: 'test'};
-
-			// Create a spy on JSON.parse to test the actual call
-			const jsonParseSpy = jest.spyOn(JSON, 'parse');
-
-			const result = validate(testString, meta);
-			expect(result.ok).toStrictEqual(false);
-			expect(result.meta).toStrictEqual(meta);
-
-			expect(jsonParseSpy).toHaveBeenCalledTimes(1);
-			expect(jsonParseSpy).toHaveBeenCalledWith(testString);
+	describe('when using the prettify API', () => {
+		it('should throw a \'TypeError\' when passing something which is not a ValidationResult instance', () => {
+			expect(() => validate.prettify(undefined)).toThrowError(expect.any(TypeError));
+			expect(() => validate.prettify(null)).toThrowError(expect.any(TypeError));
+			expect(() => validate.prettify({})).toThrowError(expect.any(TypeError));
+			expect(() => validate.prettify('string')).toThrowError(expect.any(TypeError));
 		});
 
-		it('should try to load the file in case the string is not a valid JSON literal', () => {
-			const testString = '{something: "very similar", "to": \'a valid JSON\'';
-
-			const result = validate(testString);
-			expect(result.ok).toStrictEqual(false);
-			expect(result.errors).toHaveLength(1);
-			// Match the error message
-			expect(result.errors[0]).toMatch(/not.*valid json literal/gmi);
+		it('should return the same string as the \'prettify()\' method in the ValidationResult class', () => {
+			const example = new MinimalExample();
+			const result = validate(example);
+			const instanceMsg = result.prettify();
+			const apiMsg = validate.prettify(result);
+			expect(instanceMsg).toStrictEqual(apiMsg);
 		});
-	});
 
-	it('testing with known valid examples', async () => {
-		const examplesDir = join(__dirname, 'examples');
-		const files = await readdir(examplesDir);
-		const filesContents = await Promise.all(
-			files.map(file => readFile(join(examplesDir, file), {encoding: 'utf8'}))
-		);
-		const results = filesContents.map(fileContent => validate(fileContent));
+		it('should be able to create a readable message from the ValidationResult (with valid input and with source info)', () => {
+			const example = new MinimalExample();
+			const prettyMsg = validate(example).prettify(true);
+			expect(prettyMsg).toMatch(/(.*)( - )(.*valid.*song)/gmi);
+		});
 
-		const failedExamples = results.filter(result => result.ok === false);
-		return expect(failedExamples).toHaveLength(0);
+		it('should be able to create a readable message from the ValidationResult (with valid input and without source info)', () => {
+			const example = new MinimalExample();
+			const prettyMsg = validate(example).prettify();
+			expect(prettyMsg).toMatch(/.*valid.*song/gmi);
+		});
+
+		it('should be able to create a readable message from the ValidationResult (with invalid input)', () => {
+			const example = new MinimalExample({enableName: false});
+			const prettyMsg = validate(example).prettify();
+			expect(prettyMsg).toMatch(/.*not.*valid.*song/gmi);
+		});
+
+		it('should throw a \'TypeError\' when at least one of the input is not a ValidationResult instance', () => {
+			const baseValidArray = [new MinimalExample()];
+			expect(() => validate.prettify([...baseValidArray, undefined])).toThrowError(expect.any(TypeError));
+			expect(() => validate.prettify([...baseValidArray, null])).toThrowError(expect.any(TypeError));
+			expect(() => validate.prettify([...baseValidArray, {}])).toThrowError(expect.any(TypeError));
+			expect(() => validate.prettify([...baseValidArray, 'string'])).toThrowError(expect.any(TypeError));
+		});
+
+		it('should create a singleline message from various ValidationResults when all input are valid', () => {
+			const exampleData = [
+				{
+					content: new MinimalExample(), meta: {
+						src: 'test1'
+					}
+				},
+				{
+					content: new MinimalExample(), meta: {
+						src: 'test2'}
+				}
+			];
+			const results = validate.all(exampleData);
+			expect(validate.prettify(results)).toMatch(/.*all.*valid.*songs/gmi);
+		});
+
+		it('should create a multiline message from various ValidationResults when at least one input is not valid', () => {
+			const exampleData = [
+				{
+					content: new MinimalExample({enablePnmList: false}), meta: {
+						src: 'test1'
+					}
+				},
+				{
+					content: new MinimalExample({}), meta: {
+						src: 'test2'}
+				}
+			];
+			const results = validate.all(exampleData);
+			expect(validate.prettify(results)).toMatch(/.*some.*not valid.*songs.*details/gmi);
+		});
 	});
 });
