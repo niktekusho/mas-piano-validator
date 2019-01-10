@@ -1,7 +1,7 @@
 {
     "name": "mas-piano-validator",
     "description": "This repository contains the core library to validate the piano files used in the Monika After Story DDLC Mod.",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "main": "index.js",
     "types": "index.d.ts",
     "license": "MIT",
