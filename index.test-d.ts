@@ -1,5 +1,5 @@
 import {expectType} from 'tsd-check';
-import validate, {ValidationResult, all} from '.';
+import validate, {ValidationResult, all, ValidationResultsContainer} from '.';
 
 expectType<ValidationResult>(validate('test'));
 
@@ -7,4 +7,4 @@ expectType<ValidationResult>(validate('test', {
 	src: 'test'
 }));
 
-expectType<ValidationResult[]>(all(['test']));
+expectType<ValidationResultsContainer>(all(['test']));
