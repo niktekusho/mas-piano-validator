@@ -62,7 +62,7 @@ describe('Core library testing', () => {
 			expect(validate([{a: 1}]).ok).toStrictEqual(false);
 		});
 
-		it('testing with known valid examples', async () => {
+		it('result.ok should equal true when passing valid examples', async () => {
 			const examplesDir = join(__dirname, 'examples');
 			const files = await readdir(examplesDir);
 			const filesContents = await Promise.all(
@@ -74,143 +74,69 @@ describe('Core library testing', () => {
 			return expect(failedExamples).toHaveLength(0);
 		});
 
-		it('when passing \'string\' argument should try to parse passed string like a JSON file', () => {
-			// This is known to NOT be a valid piano song
-			const testObject = {
-				a: 'something'
-			};
-			const testString = JSON.stringify(testObject);
-			const meta = {src: 'test'};
+		describe('when passing \'string\' argument', () => {
+			it('should try to parse passed string like a JSON file and return the appropriate ValidationResult (input is valid JSON)', () => {
+				// This is known to NOT be a valid piano song
+				const testObject = {
+					a: 'something'
+				};
+				const testString = JSON.stringify(testObject);
+				const meta = {src: 'test'};
 
-			// Create a spy on JSON.parse to test the actual call
-			const jsonParseSpy = jest.spyOn(JSON, 'parse');
+				// Create a spy on JSON.parse to test the actual call
+				const jsonParseSpy = jest.spyOn(JSON, 'parse');
 
-			const result = validate(testString, meta);
-			expect(result.ok).toStrictEqual(false);
-			expect(result.meta).toStrictEqual(meta);
+				const result = validate(testString, meta);
+				expect(result.ok).toStrictEqual(false);
+				expect(result.meta).toStrictEqual(meta);
 
-			expect(jsonParseSpy).toHaveBeenCalledTimes(1);
-			expect(jsonParseSpy).toHaveBeenCalledWith(testString);
-		});
+				expect(jsonParseSpy).toHaveBeenCalledTimes(1);
+				expect(jsonParseSpy).toHaveBeenCalledWith(testString);
+			});
 
-		it('when passing \'string\' argument should try to load the file in case the string is not a valid JSON literal', () => {
-			const testString = '{something: "very similar", "to": \'a valid JSON\'';
+			it('should try to parse passed string like a JSON file and return the appropriate ValidationResult (input is NOT a valid JSON)', () => {
+				const testString = '{something: "very similar", "to": \'a valid JSON\'';
 
-			const result = validate(testString);
-			expect(result.ok).toStrictEqual(false);
-			expect(result.errors).toHaveLength(1);
-			// Match the error message
-			expect(result.errors[0]).toMatch(/not.*valid json literal/i);
+				const result = validate(testString);
+				expect(result.ok).toStrictEqual(false);
+				expect(result.errors).toHaveLength(1);
+				expect(result.errors[0]).toStrictEqual('Specified argument was not a valid JSON literal');
+			});
 		});
 	});
 
 	describe('when using the \'all\' API', () => {
 		it('should signal the user if the passed argument is not an array', () => {
-			expect(() => validate.all({})).toThrowError(/.*received.*object$/mi);
-			expect(() => validate.all('a')).toThrowError(/.*received.*string$/mi);
+			expect(() => validate.all({})).toThrowError('The \'all\' function expects an argument of type array, instead it received a object');
+			expect(() => validate.all('a')).toThrowError('The \'all\' function expects an argument of type array, instead it received a string');
 		});
 
-		it('should validate all of the arguments (source unknwown)', () => {
+		it('should have ok = true and appropriate summary when all of the arguments are valid', () => {
+			const exampleData = [
+				new MinimalExample(),
+				new MinimalExample(),
+				new MinimalExample()
+			];
+			const results = validate.all(exampleData);
+			expect(results.ok).toStrictEqual(true);
+			expect(results.summary).toStrictEqual('All files are valid Monika After Story piano songs!');
+			expect(results.results).toHaveLength(3);
+			expect(results.validResults).toHaveLength(3);
+			expect(results.invalidResults).toHaveLength(0);
+		});
+
+		it('should have ok = false and appropriate summary when at least 1 of the arguments is invalid', () => {
 			const exampleData = [
 				new MinimalExample(),
 				new MinimalExample({enablePnmList: false}),
-				new MinimalExample({enablePnmList: false, enableVerseList: false})
+				{content: new MinimalExample(), meta: {src: 'test'}}
 			];
 			const results = validate.all(exampleData);
-			results.forEach(result => {
-				expect(result.meta).toStrictEqual({src: undefined});
-			});
-			expect(results.filter(result => result.ok === true)).toHaveLength(1);
-			expect(results.filter(result => result.ok === false)).toHaveLength(2);
-		});
-
-		it('should validate all of the arguments (source specified)', () => {
-			const exampleData = [
-				{content: new MinimalExample(), meta: 'test'},
-				{content: new MinimalExample({enablePnmList: false}), meta: 'test'}
-			];
-			const results = validate.all(exampleData);
-			results.forEach(result => {
-				expect(result.meta).toStrictEqual('test');
-			});
-			expect(results.filter(result => result.ok === true)).toHaveLength(1);
-			expect(results.filter(result => result.ok === false)).toHaveLength(1);
-		});
-	});
-
-	describe('when using the prettify API', () => {
-		it('should throw a \'TypeError\' when passing something which is not a ValidationResult instance', () => {
-			expect(() => validate.prettify(undefined)).toThrowError(expect.any(TypeError));
-			expect(() => validate.prettify(null)).toThrowError(expect.any(TypeError));
-			expect(() => validate.prettify({})).toThrowError(expect.any(TypeError));
-			expect(() => validate.prettify('string')).toThrowError(expect.any(TypeError));
-		});
-
-		it('should return the same string as the \'prettify()\' method in the ValidationResult class', () => {
-			const example = new MinimalExample();
-			const result = validate(example);
-			const instanceMsg = result.prettify();
-			const apiMsg = validate.prettify(result);
-			expect(instanceMsg).toStrictEqual(apiMsg);
-		});
-
-		it('should be able to create a readable message from the ValidationResult (with valid input and with source info)', () => {
-			const example = new MinimalExample();
-			const prettyMsg = validate(example).prettify(true);
-			expect(prettyMsg).toMatch(/(.*)( - )(.*valid.*song)/i);
-		});
-
-		it('should be able to create a readable message from the ValidationResult (with valid input and without source info)', () => {
-			const example = new MinimalExample();
-			const prettyMsg = validate(example).prettify();
-			expect(prettyMsg).toMatch(/.*valid.*song/i);
-		});
-
-		it('should be able to create a readable message from the ValidationResult (with invalid input)', () => {
-			const example = new MinimalExample({enableName: false});
-			const prettyMsg = validate(example).prettify();
-			expect(prettyMsg).toMatch(/.*not.*valid.*song/i);
-		});
-
-		it('should throw a \'TypeError\' when at least one of the input is not a ValidationResult instance', () => {
-			const baseValidArray = [new MinimalExample()];
-			expect(() => validate.prettify([...baseValidArray, undefined])).toThrowError(expect.any(TypeError));
-			expect(() => validate.prettify([...baseValidArray, null])).toThrowError(expect.any(TypeError));
-			expect(() => validate.prettify([...baseValidArray, {}])).toThrowError(expect.any(TypeError));
-			expect(() => validate.prettify([...baseValidArray, 'string'])).toThrowError(expect.any(TypeError));
-		});
-
-		it('should create a singleline message from various ValidationResults when all input are valid', () => {
-			const exampleData = [
-				{
-					content: new MinimalExample(), meta: {
-						src: 'test1'
-					}
-				},
-				{
-					content: new MinimalExample(), meta: {
-						src: 'test2'}
-				}
-			];
-			const results = validate.all(exampleData);
-			expect(validate.prettify(results)).toMatch(/.*all.*valid.*songs/i);
-		});
-
-		it('should create a multiline message from various ValidationResults when at least one input is not valid', () => {
-			const exampleData = [
-				{
-					content: new MinimalExample({enablePnmList: false}), meta: {
-						src: 'test1'
-					}
-				},
-				{
-					content: new MinimalExample({}), meta: {
-						src: 'test2'}
-				}
-			];
-			const results = validate.all(exampleData);
-			// The s regex flag allows '.' to match newlines too
-			expect(validate.prettify(results)).toMatch(/.*some.*not valid.*songs.*details:.*/is);
+			expect(results.ok).toStrictEqual(false);
+			expect(results.summary).toStrictEqual('Some files are NOT valid Monika After Story piano songs.');
+			expect(results.results).toHaveLength(3);
+			expect(results.validResults).toHaveLength(2);
+			expect(results.invalidResults).toHaveLength(1);
 		});
 	});
 });

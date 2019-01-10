@@ -31,10 +31,6 @@ export interface ValidationItem {
  */
 export interface ValidationResult {
 	/**
-	 * If true, the object is a valid Monika After Story piano song. False otherwise.
-	 */
-	ok: boolean,
-	/**
 	 * Array of errors caught by the validator. If ok === true than this is an empty array.
 	 */
 	errors: ajv.ErrorObject[],
@@ -43,11 +39,41 @@ export interface ValidationResult {
 	 */
 	meta: ObjectSource,
 	/**
-	 * Create a readable message from this object.
-	 *
-	 * @param {boolean} includeMeta Include the ObjectSource in the validation message.
+	 * If true, the object is a valid Monika After Story piano song. False otherwise.
 	 */
-	prettify: (includeMeta?: boolean) => string
+	ok: boolean,
+	/**
+	 * Brief description about the result of this validation.
+	 */
+	summary: string
+}
+
+/**
+ * Container of multiple `ValidationResult`s.
+ * This kind of object includes an ok flag (true means all the ValidationResults are valid Monika After Story piano songs),
+ * a results array containing the `ValidationResult` instances.
+ */
+export interface ValidationResultsContainer {
+	/**
+	 * If true, all the ValidationResults are valid Monika After Story piano songs. False otherwise.
+	 */
+	ok: boolean,
+	/**
+	 * Array of all the ValidationResult objects.
+	 */
+	results: ValidationResult[],
+	/**
+	 * Brief sentence describing the aggregated validation state.
+	 */
+	summary: string,
+	/**
+	 * Array of only valid ValidationResult objects.
+	 */
+	validResults: ValidationResult[],
+	/**
+	 * Array of only invalid ValidationResult objects.
+	 */
+	invalidResults: ValidationResult[]
 }
 
 /**
@@ -67,11 +93,4 @@ export default function validate(obj: string|object, meta?: ObjectSource): Valid
  *
  * all(...);
  */
-export function all(obj: string[]|ValidationItem[]|object[]): ValidationResult[];
-
-/**
- * Create a readable message from the specified object.
- *
- * @param result
- */
-export function prettify(result: ValidationResult|ValidationResult[]): string;
+export function all(obj: string[]|ValidationItem[]|object[]): ValidationResultsContainer;
