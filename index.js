@@ -25,7 +25,16 @@ class ValidationResultsContainer {
 		this.invalidResults = results.filter(result => result.ok === false);
 		const allValid = this.validResults.length === results.length && this.invalidResults.length === 0;
 		this.ok = allValid;
-		this.summary = allValid ? 'All files are valid Monika After Story piano songs!' : 'Some files are NOT valid Monika After Story piano songs.';
+		const allInvalid = this.validResults.length === 0 && this.invalidResults.length === results.length;
+		let summary;
+		if (allValid) {
+			summary = 'All files are valid Monika After Story piano songs.';
+		} else if (allInvalid) {
+			summary = 'All files are NOT valid Monika After Story piano songs.';
+		} else {
+			summary = 'Some files are NOT valid Monika After Story piano songs.';
+		}
+		this.summary = summary;
 	}
 }
 

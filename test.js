@@ -119,7 +119,7 @@ describe('Core library testing', () => {
 			];
 			const results = validate.all(exampleData);
 			expect(results.ok).toStrictEqual(true);
-			expect(results.summary).toStrictEqual('All files are valid Monika After Story piano songs!');
+			expect(results.summary).toStrictEqual('All files are valid Monika After Story piano songs.');
 			expect(results.results).toHaveLength(3);
 			expect(results.validResults).toHaveLength(3);
 			expect(results.invalidResults).toHaveLength(0);
@@ -137,6 +137,19 @@ describe('Core library testing', () => {
 			expect(results.results).toHaveLength(3);
 			expect(results.validResults).toHaveLength(2);
 			expect(results.invalidResults).toHaveLength(1);
+		});
+
+		it('should have ok = false and appropriate summary when all arguments are invalid', () => {
+			const exampleData = [
+				new MinimalExample({enableName: false}),
+				new MinimalExample({enablePnmList: false})
+			];
+			const results = validate.all(exampleData);
+			expect(results.ok).toStrictEqual(false);
+			expect(results.summary).toStrictEqual('All files are NOT valid Monika After Story piano songs.');
+			expect(results.results).toHaveLength(2);
+			expect(results.validResults).toHaveLength(0);
+			expect(results.invalidResults).toHaveLength(2);
 		});
 	});
 });
