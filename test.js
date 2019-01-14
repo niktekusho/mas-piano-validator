@@ -60,6 +60,9 @@ describe('Core library testing', () => {
 
 			// Case: array object
 			expect(validate([{a: 1}]).ok).toStrictEqual(false);
+
+			// Testing the errors array
+			expect(validate([{a: 1}]).errors).toHaveLength(1);
 		});
 
 		it('result.ok should equal true when passing valid examples', async () => {
@@ -71,11 +74,15 @@ describe('Core library testing', () => {
 			const results = filesContents.map(fileContent => validate(fileContent));
 
 			const failedExamples = results.filter(result => result.ok === false);
-			return expect(failedExamples).toHaveLength(0);
+			expect(failedExamples).toHaveLength(0);
 		});
 
 		describe('when passing \'string\' argument', () => {
-			it('should try to parse passed string like a JSON file and return the appropriate ValidationResult (input is valid JSON)', () => {
+			beforeEach(() => {
+				jest.restoreAllMocks();
+			});
+
+			it('should try to parse passed string like a JSON file and return the appropriate ValidationResult (input is valid JSON but invalid song)', () => {
 				// This is known to NOT be a valid piano song
 				const testObject = {
 					a: 'something'
@@ -89,6 +96,23 @@ describe('Core library testing', () => {
 				const result = validate(testString, meta);
 				expect(result.ok).toStrictEqual(false);
 				expect(result.meta).toStrictEqual(meta);
+
+				expect(jsonParseSpy).toHaveBeenCalledTimes(1);
+				expect(jsonParseSpy).toHaveBeenCalledWith(testString);
+			});
+
+			it('should try to parse passed string like a JSON file and return the appropriate ValidationResult (input is valid JSON and song)', () => {
+				const testObject = new MinimalExample();
+				const testString = JSON.stringify(testObject);
+				const meta = {src: 'test'};
+
+				// Create a spy on JSON.parse to test the actual call
+				const jsonParseSpy = jest.spyOn(JSON, 'parse');
+
+				const result = validate(testString, meta);
+				expect(result.ok).toStrictEqual(true);
+				expect(result.meta).toStrictEqual(meta);
+				expect(result.errors).toHaveLength(0);
 
 				expect(jsonParseSpy).toHaveBeenCalledTimes(1);
 				expect(jsonParseSpy).toHaveBeenCalledWith(testString);

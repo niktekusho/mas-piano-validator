@@ -12,7 +12,7 @@ class ValidationResult {
 	constructor(status, errors, meta = {src: undefined}) {
 		this.meta = meta;
 		this.ok = status;
-		this.errors = errors;
+		this.errors = errors || [];
 
 		this.summary = status === true ? 'This file is a valid Monika After Story piano song.' : 'This file is NOT a valid Monika After Story piano song.';
 	}
@@ -21,8 +21,6 @@ class ValidationResult {
 class ValidationResultsContainer {
 	constructor(results) {
 		this.results = results;
-		this.validResults = results.filter(result => result.ok === true);
-		this.invalidResults = results.filter(result => result.ok === false);
 		const allValid = this.validResults.length === results.length && this.invalidResults.length === 0;
 		this.ok = allValid;
 		const allInvalid = this.validResults.length === 0 && this.invalidResults.length === results.length;
@@ -35,6 +33,14 @@ class ValidationResultsContainer {
 			summary = 'Some files are NOT valid Monika After Story piano songs.';
 		}
 		this.summary = summary;
+	}
+
+	get validResults() {
+		return this.results.filter(result => result.ok === true);
+	}
+
+	get invalidResults() {
+		return this.results.filter(result => result.ok === false);
 	}
 }
 
