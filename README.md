@@ -78,6 +78,46 @@ console.log(result.ok); // true
 console.log(result.errors); // []
 ```
 
+### Example with multiple input (`all` API)
+
+```js
+const validate = require('mas-piano-validator');
+
+const validMASPiano = {
+	"name": "Song name",
+	"verse_list": [0],
+	"pnm_list": [
+		{
+			"text": "One",
+			"style": "monika_credits_text",
+			"notes": [
+				"D5",
+				"C5SH",
+				"B4",
+				"F4SH"
+			]
+		},
+		{
+			"text": "Two",
+			"style": "monika_credits_text",
+			"notes": [
+				"D5",
+				"A4",
+				"D5",
+				"A4"
+			]
+		}
+	]
+};
+
+const container = new validate.ValidationInputContainer();
+container.add(validMASPiano, 'test1').add(validMASPiano, 'test2');
+
+const results = validate.all(container);
+console.log(results.ok); // true
+console.log(results.summary); // All files are valid Monika After Story piano songs.
+```
+
 ### Parse existing file
 
 ```js

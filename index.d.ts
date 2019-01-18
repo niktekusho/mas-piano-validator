@@ -24,6 +24,39 @@ export interface ValidationItem {
 	meta: ObjectSource
 }
 
+export class ValidationInput {
+	/**
+	 *
+	 * @param validationItem Object or string that will be validated.
+	 * @param source Optional source of this validation item. Default is: 'unknown'.
+	 */
+	constructor(validationItem: object|string, source?:string);
+
+	/**
+	 * Object or string that will be validated.
+	 */
+	validationItem: object|string;
+
+	/**
+	 * Source of this validation item.
+	 */
+	source: string;
+}
+
+export class ValidationInputContainer {
+	/**
+	 * Array of validation input that will be validated
+	 */
+	input: ValidationInput[];
+
+	/**
+	 * Add a validation input in the container.
+	 * @param {string|object} validationItem String or object that will be validated.
+	 * @param {string} source Source of this validation item.
+	 */
+	add: (validationItem, source) => ValidationInputContainer
+}
+
 /**
  * Validation result.
  * This kind of object includes an ok flag (true means the object is a valid Monika After Story piano song),
@@ -85,7 +118,7 @@ export default function validate(obj: string|object, meta?: ObjectSource): Valid
 
 /**
  * Perform validation on every object specified.
- * @param obj Array of object to be validated.
+ * @param obj Container of input to validate.
  *
  * @example
  *
@@ -93,4 +126,4 @@ export default function validate(obj: string|object, meta?: ObjectSource): Valid
  *
  * all(...);
  */
-export function all(obj: string[]|ValidationItem[]|object[]): ValidationResultsContainer;
+export function all(obj: ValidationInputContainer): ValidationResultsContainer;

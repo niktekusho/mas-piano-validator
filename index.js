@@ -8,13 +8,76 @@ const ajv = new Ajv({
 
 const rawValidate = ajv.compile(jsonSchema);
 
-class ValidationResult {
-	constructor(status, errors, meta = {src: undefined}) {
-		this.meta = meta;
-		this.ok = status;
-		this.errors = errors || [];
+class ValidationInput {
+	constructor(validationItem, source = 'unknown') {
+		this._validationItem = validationItem;
+		this._meta = {
+			src: source
+		};
+	}
 
-		this.summary = status === true ? 'This file is a valid Monika After Story piano song.' : 'This file is NOT a valid Monika After Story piano song.';
+	get validationItem() {
+		return this._validationItem;
+	}
+
+	get source() {
+		return this._meta.src;
+	}
+}
+
+class ValidationInputContainer {
+	constructor() {
+		this._input = [];
+	}
+
+	get input() {
+		return this._input;
+	}
+
+	/**
+	 * @param {string|object} validationItem
+	 * @param {string} source
+	 */
+	add(validationItem, source) {
+		if (validationItem === null || validationItem === undefined) {
+			throw new TypeError('A validationItem must be specified.');
+		}
+
+		if (source === null || source === undefined) {
+			throw new TypeError('A source must be specified.');
+		}
+
+		if (typeof source !== 'string') {
+			throw new TypeError(`Source must be of type string, but it was of type '${typeof source}'.`);
+		}
+
+		const validationInput = new ValidationInput(validationItem, source);
+		this._input.push(validationInput);
+		return this;
+	}
+}
+
+class ValidationResult {
+	constructor(status, errors, source = 'unknown') {
+		this._source = source;
+		this._ok = status;
+		this._errors = errors || [];
+	}
+
+	get source() {
+		return this._source;
+	}
+
+	get ok() {
+		return this._ok;
+	}
+
+	get errors() {
+		return this._errors;
+	}
+
+	get summary() {
+		return this._ok ? 'This file is a valid Monika After Story piano song.' : 'This file is NOT a valid Monika After Story piano song.';
 	}
 }
 
@@ -42,39 +105,33 @@ class ValidationResultsContainer {
 	get invalidResults() {
 		return this.results.filter(result => result.ok === false);
 	}
+
+	get unknownSourceResults() {
+		return this.results.filter(result => result.source === 'unknown');
+	}
 }
 
 function validateAll(validationItems) {
-	if (Array.isArray(validationItems)) {
-		const results = validationItems.map(validationItem => {
-			if (validationItem.content && validationItem.meta) {
-				return validate(validationItem.content, validationItem.meta);
-			}
-			return validate(validationItem);
-		});
+	if (validationItems instanceof ValidationInputContainer) {
+		const results = validationItems.input.map(item => validate(item.validationItem, item.source));
 		return new ValidationResultsContainer(results);
 	}
-	// TODO: find a way to communicate the wrong API
-	throw new Error(`The 'all' function expects an argument of type array, instead it received a ${typeof validationItems}`);
+	throw new Error('The \'all\' function expects a ValidationInputContainer object.');
 }
 
-function validate(obj, meta) {
-	if (typeof obj === 'string') {
+function validate(validationItem, meta) {
+	if (typeof validationItem === 'string') {
 		try {
-			const parsed = JSON.parse(obj);
+			const parsed = JSON.parse(validationItem);
 			return new ValidationResult(rawValidate(parsed), rawValidate.errors, meta);
 		} catch (error) {
-			// TODO
-			// File is not a valid JSON:
-			// last chance is to try to guess if it's a path and then try to work with that
-
-			// TODO: use something to give the user/client a more accessible error
 			return new ValidationResult(false, ['Specified argument was not a valid JSON literal'], meta);
 		}
 	}
-	return new ValidationResult(rawValidate(obj), rawValidate.errors, meta);
+	return new ValidationResult(rawValidate(validationItem), rawValidate.errors, meta);
 }
 
 module.exports = validate;
 module.exports.default = validate;
 module.exports.all = validateAll;
+module.exports.ValidationInputContainer = ValidationInputContainer;

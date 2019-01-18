@@ -95,7 +95,7 @@ describe('Core library testing', () => {
 
 				const result = validate(testString, meta);
 				expect(result.ok).toStrictEqual(false);
-				expect(result.meta).toStrictEqual(meta);
+				expect(result.source).toStrictEqual(meta);
 
 				expect(jsonParseSpy).toHaveBeenCalledTimes(1);
 				expect(jsonParseSpy).toHaveBeenCalledWith(testString);
@@ -111,7 +111,8 @@ describe('Core library testing', () => {
 
 				const result = validate(testString, meta);
 				expect(result.ok).toStrictEqual(true);
-				expect(result.meta).toStrictEqual(meta);
+				expect(result.summary).toStrictEqual('This file is a valid Monika After Story piano song.');
+				expect(result.source).toStrictEqual(meta);
 				expect(result.errors).toHaveLength(0);
 
 				expect(jsonParseSpy).toHaveBeenCalledTimes(1);
@@ -123,6 +124,7 @@ describe('Core library testing', () => {
 
 				const result = validate(testString);
 				expect(result.ok).toStrictEqual(false);
+				expect(result.summary).toStrictEqual('This file is NOT a valid Monika After Story piano song.');
 				expect(result.errors).toHaveLength(1);
 				expect(result.errors[0]).toStrictEqual('Specified argument was not a valid JSON literal');
 			});
@@ -130,31 +132,64 @@ describe('Core library testing', () => {
 	});
 
 	describe('when using the \'all\' API', () => {
+		describe('and using the ValidationInputContainer constructor', () => {
+			it('a new instance should contain no inputs', () => {
+				const container = new validate.ValidationInputContainer();
+				expect(container.input).toHaveLength(0);
+			});
+
+			it('add valid element should return the same instance', () => {
+				const container = new validate.ValidationInputContainer();
+				expect(container.add(new MinimalExample(), 'test')).toStrictEqual(container);
+				expect(container.input).toHaveLength(1);
+			});
+
+			it('add without validationItem should throw', () => {
+				const container = new validate.ValidationInputContainer();
+				expect(() => container.add(undefined, 'test')).toThrowError();
+				expect(() => container.add(null, 'test')).toThrowError();
+			});
+
+			it('add without source should throw', () => {
+				const container = new validate.ValidationInputContainer();
+				expect(() => container.add(new MinimalExample())).toThrowError();
+				expect(() => container.add(new MinimalExample(), null)).toThrowError();
+			});
+
+			it('add with wrong type of source should throw', () => {
+				const container = new validate.ValidationInputContainer();
+				expect(() => container.add(new MinimalExample(), {})).toThrowError();
+				expect(() => container.add(new MinimalExample(), 1)).toThrowError();
+			});
+		});
+
 		it('should signal the user if the passed argument is not an array', () => {
-			expect(() => validate.all({})).toThrowError('The \'all\' function expects an argument of type array, instead it received a object');
-			expect(() => validate.all('a')).toThrowError('The \'all\' function expects an argument of type array, instead it received a string');
+			expect(() => validate.all({})).toThrowError('The \'all\' function expects a ValidationInputContainer object.');
+			expect(() => validate.all('a')).toThrowError('The \'all\' function expects a ValidationInputContainer object.');
+			expect(() => validate.all(null)).toThrowError('The \'all\' function expects a ValidationInputContainer object.');
+			expect(() => validate.all(undefined)).toThrowError('The \'all\' function expects a ValidationInputContainer object.');
+			expect(() => validate.all([])).toThrowError('The \'all\' function expects a ValidationInputContainer object.');
 		});
 
 		it('should have ok = true and appropriate summary when all of the arguments are valid', () => {
-			const exampleData = [
-				new MinimalExample(),
-				new MinimalExample(),
-				new MinimalExample()
-			];
+			const exampleData = new validate.ValidationInputContainer();
+			exampleData.add(new MinimalExample(), 'test')
+				.add(new MinimalExample(), 'test')
+				.add(new MinimalExample(), 'test');
 			const results = validate.all(exampleData);
 			expect(results.ok).toStrictEqual(true);
 			expect(results.summary).toStrictEqual('All files are valid Monika After Story piano songs.');
 			expect(results.results).toHaveLength(3);
 			expect(results.validResults).toHaveLength(3);
 			expect(results.invalidResults).toHaveLength(0);
+			expect(results.unknownSourceResults).toHaveLength(0);
 		});
 
 		it('should have ok = false and appropriate summary when at least 1 of the arguments is invalid', () => {
-			const exampleData = [
-				new MinimalExample(),
-				new MinimalExample({enablePnmList: false}),
-				{content: new MinimalExample(), meta: {src: 'test'}}
-			];
+			const exampleData = new validate.ValidationInputContainer();
+			exampleData.add(new MinimalExample(), 'test')
+				.add(new MinimalExample({enablePnmList: false}), 'test')
+				.add(new MinimalExample(), 'test');
 			const results = validate.all(exampleData);
 			expect(results.ok).toStrictEqual(false);
 			expect(results.summary).toStrictEqual('Some files are NOT valid Monika After Story piano songs.');
@@ -164,10 +199,9 @@ describe('Core library testing', () => {
 		});
 
 		it('should have ok = false and appropriate summary when all arguments are invalid', () => {
-			const exampleData = [
-				new MinimalExample({enableName: false}),
-				new MinimalExample({enablePnmList: false})
-			];
+			const exampleData = new validate.ValidationInputContainer();
+			exampleData.add(new MinimalExample({enableName: false}), 'test')
+				.add(new MinimalExample({enablePnmList: false}), 'test');
 			const results = validate.all(exampleData);
 			expect(results.ok).toStrictEqual(false);
 			expect(results.summary).toStrictEqual('All files are NOT valid Monika After Story piano songs.');
