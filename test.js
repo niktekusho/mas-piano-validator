@@ -13,9 +13,11 @@ class MinimalExample {
 		if (enableName) {
 			this.name = 'Song name';
 		}
+
 		if (enableVerseList) {
 			this.verse_list = [0];
 		}
+
 		if (enablePnmList) {
 			this.pnm_list = [
 				{

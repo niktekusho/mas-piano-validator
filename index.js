@@ -34,10 +34,6 @@ class ValidationInputContainer {
 		return this._input;
 	}
 
-	/**
-	 * @param {string|object} validationItem
-	 * @param {string} source
-	 */
 	add(validationItem, source) {
 		if (validationItem === null || validationItem === undefined) {
 			throw new TypeError('A validationItem must be specified.');
@@ -95,6 +91,7 @@ class ValidationResultsContainer {
 		} else {
 			summary = 'Some files are NOT valid Monika After Story piano songs.';
 		}
+
 		this.summary = summary;
 	}
 
@@ -116,6 +113,7 @@ function validateAll(validationItems) {
 		const results = validationItems.input.map(item => validate(item.validationItem, item.source));
 		return new ValidationResultsContainer(results);
 	}
+
 	throw new Error('The \'all\' function expects a ValidationInputContainer object.');
 }
 
@@ -128,6 +126,7 @@ function validate(validationItem, meta) {
 			return new ValidationResult(false, ['Specified argument was not a valid JSON literal'], meta);
 		}
 	}
+
 	return new ValidationResult(rawValidate(validationItem), rawValidate.errors, meta);
 }
 

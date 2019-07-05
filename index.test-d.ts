@@ -1,4 +1,4 @@
-import {expectType} from 'tsd-check';
+import {expectType} from 'tsd';
 import validate, {ValidationResult, all, ValidationResultsContainer, ValidationInputContainer} from '.';
 
 expectType<ValidationResult>(validate('test'));

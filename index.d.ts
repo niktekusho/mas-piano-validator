@@ -54,7 +54,7 @@ export class ValidationInputContainer {
 	 * @param {string|object} validationItem String or object that will be validated.
 	 * @param {string} source Source of this validation item.
 	 */
-	add: (validationItem, source) => ValidationInputContainer
+	add: (validationItem: string|object, source: string) => ValidationInputContainer
 }
 
 /**
