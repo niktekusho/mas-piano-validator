@@ -122,7 +122,7 @@ function validate(validationItem, meta) {
 		try {
 			const parsed = JSON.parse(validationItem);
 			return new ValidationResult(rawValidate(parsed), rawValidate.errors, meta);
-		} catch (error) {
+		} catch (_) {
 			return new ValidationResult(false, ['Specified argument was not a valid JSON literal'], meta);
 		}
 	}

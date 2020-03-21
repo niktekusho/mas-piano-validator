@@ -58,7 +58,7 @@ describe('Core library testing', () => {
 			expect(validate(null).ok).toStrictEqual(false);
 
 			// Case: number object
-			expect(validate(1.0).ok).toStrictEqual(false);
+			expect(validate(1.1).ok).toStrictEqual(false);
 
 			// Case: array object
 			expect(validate([{a: 1}]).ok).toStrictEqual(false);
